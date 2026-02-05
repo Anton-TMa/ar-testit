@@ -7,56 +7,46 @@ let camera, scene, renderer;
 init();
 
 function init() {
-    const container = document.createElement("div");
-    document.body.appendChild(container);
+  const container = document.createElement("div");
+  document.body.appendChild(container);
 
-    scene = new THREE.Scene();
+  scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera(
-        70,
-        window.innerWidth / window.innerHeight,
-        0.01,
-        20
-    );
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.xr.enabled = true;
-    container.appendChild(renderer.domElement);
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.xr.enabled = true;
+  container.appendChild(renderer.domElement);
 
-    const light1 = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-    scene.add(light1);
+  // Valot
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1));
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(1, 2, 3);
+  scene.add(light);
 
-    const light2 = new THREE.DirectionalLight(0xffffff, 1);
-    light2.position.set(1, 2, 3);
-    scene.add(light2);
+  // FBX LATAUS
+  const loader = new FBXLoader();
+  
+  // Polku ilman ../ jos kansio on samassa tasossa index.html kanssa
+  loader.load("fbx/DoughNut_FBX.fbx", (object) => {
+      
+      // FBX-mallit ovat usein valtavia tai pikkiriikkisiä. 
+      // Jos ei näy, kokeile (1, 1, 1) tai (0.1, 0.1, 0.1)
+      object.scale.set(0.005, 0.005, 0.005);
+      object.position.set(0, 0, -1);
+      
+      scene.add(object);
+      console.log("FBX ladattu!");
+    }, 
+    (xhr) => console.log((xhr.loaded / xhr.total * 100) + "% ladattu"),
+    (err) => console.error("FBX VIRHE:", err)
+  );
 
-    // FBX LOADER
-    const loader = new FBXLoader();
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+  });
 
-    // HUOM: Polku korjattu (olettaen että fbx-kansio on samassa tasossa index.html kanssa)
-    loader.load(
-        "fbx/DoughNut_FBX.fbx", 
-        (object) => {
-            // Skaalaus on usein FBX:n kanssa haastava. 
-            // Jos donitsi ei näy, kokeile muuttaa 0.005 -> 0.1
-            object.scale.set(0.005, 0.005, 0.005);
-            object.position.set(0, 0, -1);
-            scene.add(object);
-            console.log("Donitsi lisätty skeneen!");
-        },
-        (xhr) => {
-            console.log("Lataus:", (xhr.loaded / xhr.total) * 100 + "%");
-        },
-        (error) => {
-            console.error("FBX VIRHE:", error);
-        }
-    );
-
-    renderer.setAnimationLoop(() => {
-        renderer.render(scene, camera);
-    });
-
-    document.body.appendChild(ARButton.createButton(renderer));
+  document.body.appendChild(ARButton.createButton(renderer));
 }
