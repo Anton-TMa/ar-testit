@@ -39,7 +39,7 @@ function init() {
 const loader = new FBXLoader();
 
 loader.load(
-  "../fbx/DoughNut_FBX.fbx",
+  "/fbx/DoughNut_FBX.fbx",
   (object) => {
 
     object.scale.set(0.005, 0.005, 0.005);
@@ -63,3 +63,4 @@ loader.load(
 
   document.body.appendChild(ARButton.createButton(renderer));
 }
+
